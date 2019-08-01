@@ -32,6 +32,81 @@ def get_lons_lats_weights():
     return lons, lats, weights
 
 """
+Function to get all masks and weights
+"""
+def get_glens_masks_weights():
+    """
+    Generates all masks and weights needed for plots
+    MASKS:
+    'land_mask' - binary land mask where land fraction > 50%
+    'land_noice_mask' - binary land mask without Greenland or Antarctica and where land fraction > 50%
+    WEIGHTS:
+    'pop' - gridcell weighting by population fraction
+    'ag' - gridcell weighting by agricultural land fraction
+    'area' - simple gridcell weighting by area
+    'land_area' - land area weighting using raw land area fraction (not mask)
+    'land_noice_area' - land area without Greenland and Antarctica weighting using raw land area fraction (not mask)
+    """
+    
+    glen_dir = '/n/home03/pjirvine/keithfs1_pji/GLENS/fix/'
+    
+    """
+    Masks
+    """
+    
+    masks_weights = {}
+
+    # turn field into array then squeeze off degenerate dimensions
+
+    # land_noice mask
+    land_ga_file = 'CCSM4_land_no_gr_ant.nc'
+    f = Dataset(glen_dir + land_ga_file).variables['sftlf'][:].squeeze()
+    land_noice_data = f
+    masks_weights['land_noice_mask'] = land_noice_data > 0.5
+
+    # land mask
+    land_file = 'sftlf_CCSM4.nc'
+    f = Dataset(glen_dir + land_file).variables['sftlf'][:].squeeze()
+    land_data = f
+    masks_weights['land_mask'] = land_data > 0.5
+
+    """
+    Weights
+    """
+
+    # pop weight
+    pop_file = 'CCSM4_pop.nc'
+    f = Dataset(glen_dir + pop_file).variables['pop'][:].squeeze()
+    pop_data = f
+    masks_weights['pop'] = pop_data / np.sum(pop_data)
+
+    # ag weight
+    ag_file = 'CCSM4_agriculture.nc'
+    f = Dataset(glen_dir + ag_file).variables['fraction'][:].squeeze()
+    ag_data = f
+    masks_weights['ag'] = ag_data / np.sum(ag_data)
+ 
+    # area weight
+    weight_file = 'CCSM4_gridweights.nc'
+
+    # get area weight, turn to array, squeeze off extra dims
+    f = Dataset(glen_dir + weight_file).variables['cell_weights'][:].squeeze()
+    weight_data = f
+    masks_weights['area'] = weight_data # sums to 1.0
+
+    # land area weight
+    temp_data = land_data * weight_data
+    masks_weights['land_area'] = temp_data / np.sum(temp_data)
+
+    # land_noice area weight
+    temp_data = land_noice_data * weight_data
+    masks_weights['land_noice_area'] = temp_data / np.sum(temp_data)
+    
+    # 'land_mask', 'land_noice_mask'
+    # 'pop', 'ag', 'area', 'land_area', 'land_noice_area'
+    return masks_weights
+
+"""
 Function to get the individual 3D annual series
 """
 def get_glens_annual(var, exp, run, file_years):
@@ -121,6 +196,22 @@ def ensemble_process(var,case):
         full_data = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in core_runs]
         reduced_data = [ IDX[:,:,t_index_feedback] for IDX in full_data ]
         return ensemble_stats(reduced_data)
+    # Half-GLENS = RCP8.5 + 0.5*(GLENS-RCP8.5) @ 2075-2094
+    elif case == 'Half-GLENS':
+        # Get Full-GLENS data
+        full_data_GLENS = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in core_runs]
+        reduced_data_GLENS = [ IDX[:,:,t_index_feedback] for IDX in full_data_GLENS ]
+        GLENS_stats = ensemble_stats(reduced_data_GLENS)
+        # Get RCP8.5 data
+        full_data_RCP85 = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
+        reduced_data_RCP85 = [ IDX[:,:,t_index_feedback] for IDX in full_data_RCP85 ]
+        RCP85_stats = ensemble_stats(reduced_data_RCP85)
+
+        # Half-GLENS stats
+        HalfGLENS_mean = RCP85_stats[0] + 0.5 * (GLENS_stats[0] - RCP85_stats[0])
+        HalfGLENS_std = RCP85_stats[1] + 0.5 * (GLENS_stats[1] - RCP85_stats[1])
+        
+        return HalfGLENS_mean, HalfGLENS_std
     else:
         print(case, ' not listed')
         return None
@@ -133,7 +224,7 @@ Generate means and stds for all variables and cases
 def get_all_cases_vars():
     
     vars_glens = ['TREFHT','TREFHTMX','P-E','PRECTMX']
-    cases = ['Baseline','RCP8.5','Full-GLENS'] # MORE TO ADD LATER
+    cases = ['Baseline','RCP8.5','Full-GLENS','Half-GLENS'] # MORE TO ADD LATER
     all_data = {}
     for var in vars_glens:
         for case in cases:
