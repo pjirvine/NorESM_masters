@@ -125,7 +125,7 @@ def get_glens_annual(var, exp, run, file_years):
     # convert units from K to C and from M/s to mm/day
     second_to_day = 60. * 60. * 24.
     var_mult = {'TREFHT':1.0, 'TREFHTMX':1.0, 'P-E':second_to_day * 1000., 'PRECTMX':second_to_day * 1000.,}
-    var_const = {'TREFHT':-273.15, 'TREFHTMX':-273.15, 'P-E':second_to_day * 1000., 'PRECTMX':second_to_day * 1000.,}
+    var_const = {'TREFHT':-273.15, 'TREFHTMX':-273.15, 'P-E':0.0, 'PRECTMX':0.0,}
     data = var_mult[var] * f + var_const[var]
     
     # Return array but transpose order of dimensions from (t, y, x) to (x, y, t) and remove empty dimensions.
