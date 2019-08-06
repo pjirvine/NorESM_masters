@@ -279,7 +279,7 @@ def get_all_cases_vars():
 Generate better / worse off and all anomalies for 3 cases
 """
 
-def better_worse_full_data(all_data, case_sg, case_CO2, case_ctrl, var, weight, nyears=80, ttest_level=0.1):
+def better_worse_full_data(all_data, case_sg, case_CO2, case_ctrl, var, weight, nyears=80, ttest_level=0.1, anom_type='standard'):
     """
     Given 3 cases, a variable and a weight --> returns dictionary of better, worse off etc.
     """
@@ -299,6 +299,23 @@ def better_worse_full_data(all_data, case_sg, case_CO2, case_ctrl, var, weight, 
     sg_CO2_anom = case_sg_mean - case_CO2_mean
     b_nosign = abs(sg_anom) < abs(CO2_anom)
     w_nosign = abs(sg_anom) >= abs(CO2_anom)
+    
+    # Modify output anom_type
+    if anom_type == 'standard':
+        pass
+    # % change anomalies
+    elif anom_type == 'pc':
+        CO2_anom = 100. * ((case_CO2_mean / case_ctrl_mean) - 1.0)
+        sg_anom = 100. * ((case_sg_mean / case_ctrl_mean) - 1.0)
+        sg_CO2_anom = 100. * ((case_sg_mean / case_CO2_mean) - 1.0)
+    # anomalies in terms of control STDS
+    elif anom_type == 'SD':
+        CO2_anom = (case_CO2_mean - case_ctrl_mean) / case_ctrl_std
+        sg_anom = (case_sg_mean - case_ctrl_mean) / case_ctrl_std
+        sg_CO2_anom = (case_sg_mean - case_CO2_mean) / case_ctrl_std # Note this is CTRL STDs
+    else:
+        print('not recognized anom type: ' + anom_type)
+        return None
     
     # calculate whether CO2 anom and sg-CO2 anom are significant
     CO2_sign = ttest_sub(case_CO2_mean, case_CO2_std, nyears, case_ctrl_mean, case_ctrl_std, nyears) < ttest_level
