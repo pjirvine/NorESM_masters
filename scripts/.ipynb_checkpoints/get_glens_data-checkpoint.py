@@ -273,3 +273,70 @@ def get_all_cases_vars():
     
     return all_data
 #end def
+
+"""
+Generate better / worse off and all anomalies for 3 cases
+"""
+
+def better_worse_full_data(case_sg, case_CO2, case_ctrl, var, weight, nyears=80, ttest_level=0.1):
+    """
+    Given 3 cases, a variable and a weight --> returns dictionary of better, worse off etc.
+    """
+    
+    # Get means and stds for each case
+    case_sg_mean, case_sg_std = all_data[(var, case_sg)]
+    case_CO2_mean, case_CO2_std = all_data[(var, case_CO2)]
+    case_ctrl_mean, case_ctrl_std = all_data[(var, case_ctrl)]
+    
+    # Returns better[], worse[], dont_know[]
+    better, worse, dont_know = better_worse_off(case_sg_mean, case_sg_std, case_CO2_mean, case_CO2_std, case_ctrl_mean, case_ctrl_std, nyears, ttest_level)   
+    certain = better + worse
+    
+    # calculate which anom is greater 
+    CO2_anom = case_CO2_mean - case_ctrl_mean
+    sg_anom = case_sg_mean - case_ctrl_mean
+    sg_CO2_anom = case_sg_mean - case_CO2_mean
+    b_nosign = abs(sg_anom) < abs(CO2_anom)
+    w_nosign = abs(sg_anom) >= abs(CO2_anom)
+    
+    # calculate whether CO2 anom and sg-CO2 anom are significant
+    CO2_sign = ttest_sub(case_CO2_mean, case_CO2_std, nyears, case_ctrl_mean, case_ctrl_std, nyears) < ttest_level
+    sg_sign = ttest_sub(case_sg_mean, case_sg_std, nyears, case_ctrl_mean, case_ctrl_std, nyears) < ttest_level
+    sg_CO2_sign = ttest_sub(case_sg_mean, case_sg_std, nyears, case_CO2_mean, case_CO2_std, nyears) < ttest_level
+    
+    # create dictionary of masks (true/false) for each outcome
+    masks = {}
+    masks['better'] = better.flatten()
+    masks['worse'] = worse.flatten()
+    masks['dont_know'] = dont_know.flatten()
+    masks['certain'] = certain.flatten()
+    masks['b_nosign'] = b_nosign.flatten()
+    masks['w_nosign'] = w_nosign.flatten()
+    masks['CO2_sign'] = CO2_sign.flatten()
+    masks['sg_sign'] = sg_sign.flatten()
+    masks['sg_CO2_sign'] = sg_CO2_sign.flatten()
+    
+    # Create dictionary of masked weights for each outcome
+    weights = {}
+       
+    def weight_func(mask, weight):
+        return weight.flatten() * mask.flatten()
+    
+    for key, value in masks.items():
+        weights[key] = weight_func(value,weight)
+          
+    # Create dictionary of weighted fraction for each mask
+    fractions = {} 
+    
+    def weighted_frac(weight, weight_orig):
+        fraction = np.sum(weight) / np.sum(weight_orig)
+        if fraction > 1:
+            print('weight problem', fraction)
+        return fraction
+    
+    for key, value in weights.items():
+        fractions[key] = weighted_frac(value,weight)
+        
+    # return all 3 anomalies, and masks, weights and fractions for each better / worse off outcome
+    return sg_anom, CO2_anom, sg_CO2_anom, masks, weights, fractions
+#end def
