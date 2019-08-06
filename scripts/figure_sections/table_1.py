@@ -8,7 +8,7 @@ Get better / worse off statistics for:
 # output to here
 table_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/tables/'
 
-mask = all_masks['land_noice_area']
+weight = all_masks['land_noice_area']
 
 case_combos = {'Full-GLENS': ['Full-GLENS','RCP8.5','Baseline'],
                'Half-GLENS': ['Half-GLENS','RCP8.5','Baseline'],
@@ -28,7 +28,7 @@ for var in vars_glens:
     # create a dict to store output of combo loop (wipes each var loop)
     combo_dict = {}
     for key, value in case_combos.items():
-        sg_anom, co2_anom, sg_CO2_anom, masks, weights, fractions = better_worse_full_data(all_data, value[0], value[1], value[2], var, mask)
+        sg_anom, co2_anom, sg_CO2_anom, masks, weights, fractions = better_worse_full_data(all_data, value[0], value[1], value[2], var, weight)
         combo_dict[key] = bwdk_format(fractions)
     
     # store combo dict in var dict
