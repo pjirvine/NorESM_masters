@@ -49,11 +49,18 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
 Cases to plot
 """
 
-out_name = 'fig_2_perfect'
+out_name = 'fig_2_perfect_flipped'
 
 cases = ['Baseline-2','RCP8.5','Baseline']
 var_1 = 'P-E'
 var_2 = 'PRECTMX'
+
+flipped = True
+
+# for flipped reverse order of baseline and RCP8.5 and invert plots
+if flipped:
+    cases_new = [cases[0],cases[2],cases[1]]
+    cases = cases_new
 
 """
 settings
@@ -131,6 +138,9 @@ plt.title('Precipitation - Evaporation (PE)')
 plt.axis('scaled')
 
 sg_anom, CO2_anom, sg_CO2_anom, masks, weights, fractions = better_worse_full_data(all_data, cases[0], cases[1], cases[2], var, weight, anom_type='standard')
+if flipped:
+    CO2_anom = -1. * CO2_anom
+    sg_anom  = -1. * sg_anom
 
 # Set axes and add lines
 
@@ -190,6 +200,9 @@ plt.title('Max. Precipitation (Px)')
 plt.axis('scaled')
 
 sg_anom, CO2_anom, sg_CO2_anom, masks, weights, fractions = better_worse_full_data(all_data, cases[0], cases[1], cases[2], var, weight, anom_type='standard')
+if flipped:
+    CO2_anom = -1. * CO2_anom
+    sg_anom  = -1. * sg_anom
 
 # Set axes and add lines
 
