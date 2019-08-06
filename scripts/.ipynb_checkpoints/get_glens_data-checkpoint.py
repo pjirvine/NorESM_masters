@@ -6,6 +6,7 @@ This package
 # import cf
 from netCDF4 import Dataset
 import numpy as np
+from analysis import *
 
 """
 Function to get lons, lats and weights from example netcdf file.
@@ -278,7 +279,7 @@ def get_all_cases_vars():
 Generate better / worse off and all anomalies for 3 cases
 """
 
-def better_worse_full_data(case_sg, case_CO2, case_ctrl, var, weight, nyears=80, ttest_level=0.1):
+def better_worse_full_data(all_data, case_sg, case_CO2, case_ctrl, var, weight, nyears=80, ttest_level=0.1):
     """
     Given 3 cases, a variable and a weight --> returns dictionary of better, worse off etc.
     """
