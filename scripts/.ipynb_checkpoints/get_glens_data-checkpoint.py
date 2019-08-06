@@ -142,9 +142,13 @@ def ensemble_process(var,case):
     'Baseline'     - RCP8.5 @ 2010-2029
     'RCP8.5'       - RCP8.5 @ 2075-2094
     'Full-GLENS'   - GLENS  @ 2075-2094
-    ### NOT DONE ### 'Half-GLENS'   - Scaled Half-GLENS  @ 2075-2094
-    ### NOT DONE ### 'Baseline-2'   - Shifted Half-GLENS @ 2075-2094
-    ### NOT DONE ### 'Half-GLENS-2' - RCP8.5 @ 2010-2029 W/ alternate runs
+    'Half-GLENS'   - Scaled Half-GLENS  @ 2075-2094
+    'Baseline-2'   - Shifted Half-GLENS @ 2075-2094  W/ alternate runs
+    'RCP8.5-2'       - !!! NO ALTERNATE RUNS - NOT POSSIBLE !!!!
+    'Full-GLENS-2'   - GLENS  @ 2075-2094  W/ alternate runs
+    'Half-GLENS-2'   - Scaled Half-GLENS  @ 2075-2094  W/ alternate runs
+    'RCP8.5-2'       - !!! NO ALTERNATE RUNS - NOT POSSIBLE !!!!
+    ### NOT DONE ### 'Half-GLENS-time' - RCP8.5 @ 2010-2029 W/ alternate runs
     """
     
     def ensemble_stats(ens_data):
@@ -188,7 +192,7 @@ def ensemble_process(var,case):
     Produce data according to rules for each case
     """
     
-    # RCP8.5 @ 2010-2029
+    # BASELINE - RCP8.5 @ 2010-2029
     if case == 'Baseline':
         full_data = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
         reduced_data = [ IDX[:,:,t_index_baseline] for IDX in full_data ]
@@ -219,6 +223,35 @@ def ensemble_process(var,case):
         HalfGLENS_std = RCP85_stats[1] + 0.5 * (GLENS_stats[1] - RCP85_stats[1])
         
         return HalfGLENS_mean, HalfGLENS_std
+    # BASELINE-2 - RCP8.5 @ 2010-2029 W/ alternate runs
+    if case == 'Baseline-2':
+        full_data = [get_glens_annual(var, 'control', IDX, control_short_file_years) for IDX in alt_runs]
+        reduced_data = [ IDX[:,:,t_index_baseline] for IDX in full_data ]
+        return ensemble_stats(reduced_data)
+    #
+    #### NO ALTERNATE RUNS AVAILABLE FOR RCP8.5 @ 2075-2094
+    #
+    # GLENS -2 @ 2075-2094 W/ alternate runs
+    elif case == 'Full-GLENS-2':
+        full_data = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in alt_runs]
+        reduced_data = [ IDX[:,:,t_index_feedback] for IDX in full_data ]
+        return ensemble_stats(reduced_data)
+    # Half-GLENS -2 = RCP8.5 + 0.5*(GLENS-RCP8.5) @ 2075-2094  W/ alternate runs
+    elif case == 'Half-GLENS-2':
+        # Get Full-GLENS data
+        full_data_GLENS = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in alt_runs]
+        reduced_data_GLENS = [ IDX[:,:,t_index_feedback] for IDX in full_data_GLENS ]
+        GLENS_stats = ensemble_stats(reduced_data_GLENS)
+        # Get RCP8.5 data
+        full_data_RCP85 = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
+        reduced_data_RCP85 = [ IDX[:,:,t_index_feedback] for IDX in full_data_RCP85 ]
+        RCP85_stats = ensemble_stats(reduced_data_RCP85)
+
+        # Half-GLENS stats
+        HalfGLENS_mean = RCP85_stats[0] + 0.5 * (GLENS_stats[0] - RCP85_stats[0])
+        HalfGLENS_std = RCP85_stats[1] + 0.5 * (GLENS_stats[1] - RCP85_stats[1])
+        
+        return HalfGLENS_mean, HalfGLENS_std
     else:
         print(case, ' not listed')
         return None
@@ -231,7 +264,7 @@ Generate means and stds for all variables and cases
 def get_all_cases_vars():
     
     vars_glens = ['TREFHT','TREFHTMX','P-E','PRECTMX']
-    cases = ['Baseline','RCP8.5','Full-GLENS','Half-GLENS'] # MORE TO ADD LATER
+    cases = ['Baseline','RCP8.5','Full-GLENS','Half-GLENS','Baseline-2','Full-GLENS-2','Half-GLENS-2'] # MORE TO ADD LATER
     all_data = {}
     for var in vars_glens:
         for case in cases:
