@@ -55,116 +55,49 @@ def anom_map(data, bounds, labels, title, cbar_label, out_name=None, show=False)
 #end def
 
 """
-Efficacy map function
+Anom map set function
 """
 
-def eff_map(data, bounds, labels, title, cbar_label, mask, mask_threshold=0.27, out_name=None, show=False):
-    """
-    mask threshold: 0.27 = 90% T-Test, 0.32 = 95% T-Test
-    """
+def anom_map_set(all_data, var, var_title, anom_type, cbar_label, bounds, labels, cmap=None):
+    cases = ['Full-GLENS','RCP8.5','Baseline']
+    sg_anom, CO2_anom, sg_CO2_anom, masks, weights, fractions = better_worse_full_data(all_data, cases[0], cases[1], cases[2], var, weight, nyears=80, ttest_level=0.1, anom_type=anom_type)
+    # get data for HALF-GLENS
+    cases = ['Half-GLENS','RCP8.5','Baseline']
+    half_sg_anom, CO2_anom, half_sg_CO2_anom, masks, weights, fractions = better_worse_full_data(all_data, cases[0], cases[1], cases[2], var, weight, nyears=80, ttest_level=0.1, anom_type=anom_type)
 
-    """
-    Define new colormap
-    """
+    # Produce plots
+    title = 'RCP8.5 - Baseline, ' + var_title
+    out_name = 'RCP8.5_'+var+'_'+anom_type+'_anom'
+    anom_map(CO2_anom.transpose(), bounds, labels, title, cbar_label, out_name=out_name, show=True)
 
-    from matplotlib import cm
-    from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+    title = 'Full-GLENS - Baseline, ' + var_title
+    out_name = 'Full-GLENS_'+var+'_'+anom_type+'_anom'
+    anom_map(sg_anom.transpose(), bounds, labels, title, cbar_label, out_name=out_name, show=True)
 
-    rdylgn_1 = cm.get_cmap('RdYlGn', 200)
-    rdylgn_2 = cm.get_cmap('RdYlGn', 200)
-    rdbu = cm.get_cmap('PRGn', 200)
+    # Note this is inverted!
+    title = 'RCP8.5 - Full-GLENS, ' + var_title
+    out_name = 'RCP8.5-Full-GLENS_'+var+'_'+anom_type+'_anom'
+    anom_map(-1. * sg_CO2_anom.transpose(), bounds, labels, title, cbar_label, out_name=out_name, show=True)
 
-    color_a = rdylgn_1(np.linspace(0, 1, 200))
-    color_b = rdylgn_2(np.linspace(0, 1, 200))
-    color_c = rdbu(np.flip(np.linspace(0, 1, 200)))
-
-    color_list = [color_b[-1], (0.8, 0.8, 1), color_c[-1]]
-    cmap_from_list = LinearSegmentedColormap.from_list('my_colors', color_list, N=200)
-    color_d = cmap_from_list(np.linspace(0, 1, 200))
-
-    newcolors = np.vstack((color_a[0:100], color_b[100:200], color_d))
-    newcmp = ListedColormap(newcolors, name='spectral_pete')
-
-    """
-    make plot
-    """
-
-    fig = plt.figure(figsize=(13,6.2))
-
-    plt.rcParams.update({'font.size': 16})
-
-    ax = plt.subplot(111, projection=ccrs.PlateCarree())
-
-    data_cyc, lons_cyc = add_cyclic_point(data, coord=lons)
-    mask_cyc, lons_cyc = add_cyclic_point(mask, coord=lons)
-    lons2d_cyc, lats2d = np.meshgrid(lons_cyc, lats)
-
-    masked_data = np.ma.array(data_cyc,mask=abs(mask_cyc) < mask_threshold)
-
-    mm = ax.pcolormesh(lons2d_cyc, lats2d, masked_data, vmin=bounds[0], vmax=bounds[-1],
-                       transform=ccrs.PlateCarree(),cmap=newcmp )
-    ax.coastlines()
-
-    plt.title(title)
-
-    cbar = fig.colorbar(mm, ax=ax, ticks=bounds)
-    cbar.set_ticklabels(labels)
-    cbar.set_label(cbar_label)
-
-    # fig.subplots_adjust(right=0.85)
-    # # add_axes defines new area with: X_start, Y_start, width, height
-    # cax = fig.add_axes([0.85,0.53,0.03,0.35])
-
-    if out_name is not None:
-        plt.savefig(out_dir+out_name+'.png', format='png', dpi=600)
-        plt.savefig(out_dir+out_name+'.eps', format='eps', dpi=600)
-
-    if show:
-        plt.show()
+    title = 'Half-GLENS - Baseline, ' + var_title
+    out_name = 'Half-GLENS_'+var+'_'+anom_type+'_anom'
+    anom_map(half_sg_anom.transpose(), bounds, labels, title, cbar_label, out_name=out_name, show=True)
 #end def
+
+"""
+Produce Anom Maps
+"""
 
 out_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/plots/'
 
-"""
-Anom Map example
-"""
-
-# Set cases, var and get data
-cases = ['Full-GLENS','RCP8.5','Baseline']
-var = 'PRECTMX'
 weight = all_masks['area']
-# get SD anoms
-sg_anom, CO2_anom, sg_CO2_anom, masks, weights, fractions = better_worse_full_data(all_data, cases[0], cases[1], cases[2], var, weight, nyears=80, ttest_level=0.1, anom_type='SD')
 
-data = CO2_anom.transpose()
-bounds = [-3,-2,-1,0,1,2,3]
-labels = [str(IDX) for IDX in bounds]
-title = 'RCP8.5 - Baseline, Precipitation - Evaporation'
-cbar_label = 'P-E Baseline STDs'
-out_name = 'RCP8.5_SD_anom'
+var = 'P-E'
+var_title = 'Precipitation - Evaporation'
+anom_type = 'SD'
+cbar_label = 'Baseline STDs'
+bounds = [-1,-0.5,0,0.5,1.0]
+labels = ["{:2.1f}".format(IDX) for IDX in bounds]
+cmap = None
 
-anom_map(data, bounds, labels, title, cbar_label, out_name=out_name, show=False)
-
-"""
-Efficacy Map example
-"""
-
-# Set cases, var and get data
-cases = ['Full-GLENS','RCP8.5','Baseline']
-var = 'PRECTMX'
-weight = all_masks['area']
-# get SD anoms
-sg_anom, CO2_anom, sg_CO2_anom, masks, weights, fractions = better_worse_full_data(all_data, cases[0], cases[1], cases[2], var, weight, nyears=80, ttest_level=0.1, anom_type='SD')
-
-eff = -1. * (sg_CO2_anom / CO2_anom)
-
-data = eff.transpose()
-mask = CO2_anom.transpose()
-
-bounds = [-1, -0.5, 0., 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
-labels = [str(IDX) for IDX in bounds]
-title = var+' GLENS Efficacy'
-cbar_label = 'Efficacy (ratio)'
-out_name = var+'_eff_map' 
-
-eff_map(data, bounds, labels, title, cbar_label, mask, mask_threshold=0.27, out_name=out_name, show=False)
+anom_map_set(all_data, var, var_title, anom_type, cbar_label, bounds, labels, cmap=None)
