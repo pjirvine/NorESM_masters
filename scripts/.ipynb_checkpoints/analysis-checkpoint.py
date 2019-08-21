@@ -7,6 +7,49 @@ import numpy as np
 # import cf
 from scipy.stats import ttest_ind_from_stats
 import itertools
+from get_glens_data import *
+
+def ens_timeseries(var, exp, weight):
+    """
+    Function to calculate timeseries of global means of 4-member ensemble
+    """
+    
+    # define file_years and runs
+    file_years = {'control':'201001-209912', 'feedback':'202001-209912'}
+    # The same 4 core runs will be used for the RCP8.5, baseline and GLENS data
+    runs = ['001','002','003','021']
+    
+    # Make list of 2D timeseries of data using the get_glens_annual() function.
+    data_list = [get_glens_annual(var, exp, RUN, file_years[exp]) for RUN in runs]
+    
+    #calculate weighted mean for each member
+    global_mean_list = [global_mean(DATA, weight) for DATA in data_list] # needs to be sorted !!!!!!!!!!!!!!!!!!!!!!!!!!
+    
+    # match all to minimum length (some have 89 some 91 years)
+    min_length = np.min([X.shape for X in global_mean_list])
+    matched_length_list = [X[0:min_length] for X in global_mean_list]
+    
+    # ensemble mean
+    global_mean_ens_array = np.vstack(matched_length_list) # shape = (4, 89)
+    ens_global_mean = np.mean(global_mean_ens_array, axis=0)
+    
+    return ens_global_mean
+#enddef ens_timeseries
+
+def global_mean(timeseries_2D, weight):
+    # Takes data of form (Lon, Lat, time) and weight of (Lon, Lat) and calculates global_mean
+    
+    # First match weight shape to timeseries shape
+    series_shape = timeseries_2D.shape
+    weight_tiled = np.tile(weight, (series_shape[2],1,1)) # repeat weight the number of years
+    weight_series = np.moveaxis(weight_tiled, 0, -1)
+    
+    # Now multiply and sum
+    weighted_timeseries = weight_series * timeseries_2D
+    weighted_mean = np.sum(weighted_timeseries, (0,1))
+    
+    return weighted_mean
+#end def global_mean
 
 def weighted_quantile(values, quantiles, sample_weight=None, values_sorted=False, old_style=False):
     """ Very close to numpy.percentile, but supports weights.
