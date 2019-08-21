@@ -1,4 +1,5 @@
 ,TREFHT,TREFHTMX,P-E,PRECTMX
 Full-GLENS,better: 100.00 worse: 0.00 dont_know: 0.00,better: 99.94 worse: 0.00 dont_know: 0.06,better: 60.16 worse: 9.82 dont_know: 30.02,better: 77.28 worse: 0.93 dont_know: 21.78
-Half-GLENS,better: 100.00 worse: 0.00 dont_know: 0.00,better: 100.00 worse: 0.00 dont_know: 0.00,better: 61.02 worse: 2.74 dont_know: 36.23,better: 76.76 worse: 0.03 dont_know: 23.20
+Half-GLENS,better: 100.00 worse: 0.00 dont_know: 0.00,better: 100.00 worse: 0.00 dont_know: 0.00,better: 58.90 worse: 1.77 dont_know: 39.33,better: 73.57 worse: 0.00 dont_know: 26.43
+Half-GLENS-time,better: 100.00 worse: 0.00 dont_know: 0.00,better: 99.68 worse: 0.00 dont_know: 0.32,better: 55.24 worse: 7.14 dont_know: 37.62,better: 62.49 worse: 0.78 dont_know: 36.73
 Perfect,better: 100.00 worse: 0.00 dont_know: 0.00,better: 100.00 worse: 0.00 dont_know: 0.00,better: 72.04 worse: 0.23 dont_know: 27.74,better: 81.44 worse: 0.09 dont_know: 18.47

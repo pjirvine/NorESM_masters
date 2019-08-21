@@ -144,12 +144,11 @@ def ensemble_process(var,case):
     'RCP8.5'       - RCP8.5 @ 2075-2094
     'Full-GLENS'   - GLENS  @ 2075-2094
     'Half-GLENS'   - Scaled Half-GLENS  @ 2075-2094
-    'Baseline-2'   - Shifted Half-GLENS @ 2075-2094  W/ alternate runs
+    'Half-GLENS-time'- Shifted Half-GLENS  @ 2044-2063
+    'Baseline-2'   - RCP8.5 @ 2010-2029  W/ alternate runs
     'RCP8.5-2'       - !!! NO ALTERNATE RUNS - NOT POSSIBLE !!!!
     'Full-GLENS-2'   - GLENS  @ 2075-2094  W/ alternate runs
     'Half-GLENS-2'   - Scaled Half-GLENS  @ 2075-2094  W/ alternate runs
-    'RCP8.5-2'       - !!! NO ALTERNATE RUNS - NOT POSSIBLE !!!!
-    ### NOT DONE ### 'Half-GLENS-time' - RCP8.5 @ 2010-2029 W/ alternate runs
     """
     
     def ensemble_stats(ens_data):
@@ -178,6 +177,9 @@ def ensemble_process(var,case):
     t_index_control = np.where((years_control > 2074) & (years_control < 2095))[0]
     t_index_baseline = np.where((years_control > 2009) & (years_control < 2030))[0]
     t_index_feedback = np.where((years_feedback > 2074) & (years_feedback < 2095))[0]
+    # Years found using offline calculation with this function call: closest_years_to_frac_GLENS(0.5)
+    t_index_feedback_half = np.where((years_feedback > 2043) & (years_feedback < 2064))[0]
+    t_index_control_half = np.where((years_control > 2043) & (years_control < 2064))[0]
     
     # year ranges which appears in filename
     control_file_years = '201001-209912'
@@ -216,7 +218,7 @@ def ensemble_process(var,case):
         GLENS_stats = ensemble_stats(reduced_data_GLENS)
         # Get RCP8.5 data
         full_data_RCP85 = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
-        reduced_data_RCP85 = [ IDX[:,:,t_index_feedback] for IDX in full_data_RCP85 ]
+        reduced_data_RCP85 = [ IDX[:,:,t_index_control] for IDX in full_data_RCP85 ]
         RCP85_stats = ensemble_stats(reduced_data_RCP85)
 
         # Half-GLENS stats
@@ -224,6 +226,26 @@ def ensemble_process(var,case):
         HalfGLENS_std = RCP85_stats[1] + 0.5 * (GLENS_stats[1] - RCP85_stats[1])
         
         return HalfGLENS_mean, HalfGLENS_std
+    # Half-GLENS-time = RCP8.5 @ 2075-2094 + (RCP8.5 - GLENS) @ 2044-2063
+    elif case == 'Half-GLENS-time':
+        # Get Full-GLENS data @ 2044-2063
+        full_data_GLENS = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in core_runs]
+        reduced_data_GLENS_44_63 = [ IDX[:,:,t_index_feedback_half] for IDX in full_data_GLENS ]
+        GLENS_stats_44_63 = ensemble_stats(reduced_data_GLENS_44_63)
+        # Get RCP8.5 data @ 2044-2063
+        full_data_RCP85 = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
+        reduced_data_RCP85_44_63 = [ IDX[:,:,t_index_control_half] for IDX in full_data_RCP85 ]
+        RCP85_stats_44_63 = ensemble_stats(reduced_data_RCP85_44_63)
+        # Get RCP8.5 data @ 2075-2094
+        full_data_RCP85 = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
+        reduced_data_RCP85 = [ IDX[:,:,t_index_control] for IDX in full_data_RCP85 ]
+        RCP85_stats = ensemble_stats(reduced_data_RCP85)
+        
+        # Half-GLENS stats
+        HalfGLENS_time_mean = RCP85_stats[0] + (GLENS_stats_44_63[0] - RCP85_stats_44_63[0])
+        HalfGLENS_time_std = RCP85_stats[1] + (GLENS_stats_44_63[1] - RCP85_stats_44_63[1])
+        
+        return HalfGLENS_time_mean, HalfGLENS_time_std
     # BASELINE-2 - RCP8.5 @ 2010-2029 W/ alternate runs
     if case == 'Baseline-2':
         full_data = [get_glens_annual(var, 'control', IDX, control_short_file_years) for IDX in alt_runs]
@@ -265,7 +287,7 @@ Generate means and stds for all variables and cases
 def get_all_cases_vars():
     
     vars_glens = ['TREFHT','TREFHTMX','P-E','PRECTMX']
-    cases = ['Baseline','RCP8.5','Full-GLENS','Half-GLENS','Baseline-2','Full-GLENS-2','Half-GLENS-2'] # MORE TO ADD LATER
+    cases = ['Baseline','RCP8.5','Full-GLENS','Half-GLENS','Half-GLENS-time','Baseline-2','Full-GLENS-2','Half-GLENS-2'] # MORE TO ADD LATER
     all_data = {}
     for var in vars_glens:
         for case in cases:

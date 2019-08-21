@@ -12,6 +12,7 @@ weight = all_masks['land_noice_area']
 
 case_combos = {'Full-GLENS': ['Full-GLENS','RCP8.5','Baseline'],
                'Half-GLENS': ['Half-GLENS','RCP8.5','Baseline'],
+               'Half-GLENS-time': ['Half-GLENS','RCP8.5','Baseline'],
                'Perfect': ['Baseline-2','RCP8.5','Baseline'],
               }
 
