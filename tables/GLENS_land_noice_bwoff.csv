@@ -1,5 +1,4 @@
-,TREFHT,TREFHTMX,P-E,PRECTMX
-Full-GLENS,better: 100.00 worse: 0.00 dont_know: 0.00,better: 99.94 worse: 0.00 dont_know: 0.06,better: 60.16 worse: 9.82 dont_know: 30.02,better: 77.28 worse: 0.93 dont_know: 21.78
-Half-GLENS,better: 100.00 worse: 0.00 dont_know: 0.00,better: 100.00 worse: 0.00 dont_know: 0.00,better: 58.90 worse: 1.77 dont_know: 39.33,better: 73.57 worse: 0.00 dont_know: 26.43
-Half-GLENS-time,better: 100.00 worse: 0.00 dont_know: 0.00,better: 99.68 worse: 0.00 dont_know: 0.32,better: 55.24 worse: 7.14 dont_know: 37.62,better: 62.49 worse: 0.78 dont_know: 36.73
-Perfect,better: 100.00 worse: 0.00 dont_know: 0.00,better: 100.00 worse: 0.00 dont_know: 0.00,better: 72.04 worse: 0.23 dont_know: 27.74,better: 81.44 worse: 0.09 dont_know: 18.47
+,TREFHT,TREFHTMX,P-E,PRECTMX,PRECT
+Full-GLENS,better: 100.00 worse: 0.00 dont_know: 0.00,better: 99.94 worse: 0.00 dont_know: 0.06,better: 60.16 worse: 9.82 dont_know: 30.02,better: 77.28 worse: 0.93 dont_know: 21.78,better: 65.47 worse: 9.61 dont_know: 24.92
+Half-GLENS,better: 100.00 worse: 0.00 dont_know: 0.00,better: 100.00 worse: 0.00 dont_know: 0.00,better: 58.90 worse: 1.77 dont_know: 39.33,better: 73.57 worse: 0.00 dont_know: 26.43,better: 67.72 worse: 1.24 dont_know: 31.04
+Perfect,better: 100.00 worse: 0.00 dont_know: 0.00,better: 100.00 worse: 0.00 dont_know: 0.00,better: 72.04 worse: 0.23 dont_know: 27.74,better: 81.44 worse: 0.09 dont_know: 18.47,better: 76.92 worse: 0.07 dont_know: 23.02

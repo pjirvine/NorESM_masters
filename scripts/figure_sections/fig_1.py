@@ -3,19 +3,17 @@
 import matplotlib.ticker as ticker
 
 """
-Set standard plot options
-"""
-
-hist_kwargs = {'histtype':'step', 'color':['b','r']}
-
-weighting = 'land_noice_area'
-hist_kwargs['weights'] = [all_masks[weighting].flatten(), all_masks[weighting].flatten()]
-
-"""
 Figure settings
 """
 
 out_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/figures/'
+
+weight = 'land_noice_area'
+out_filename = 'fig1'
+
+# # For population-weighted version
+# weight = 'pop'
+# out_filename = 'fig1_pop'
 
 quantiles = [0.01,0.05,0.25,0.5,0.75,0.95,0.99]
 
@@ -25,8 +23,6 @@ CASES:
 'RCP8.5'       - RCP8.5 @ 2075-2094
 'Full-GLENS'   - GLENS  @ 2075-2094
 'Half-GLENS'   - Scaled Half-GLENS  @ 2075-2094
-### NOT DONE ### 'Baseline-2'   - Shifted Half-GLENS @ 2075-2094
-### NOT DONE ### 'Half-GLENS-2' - RCP8.5 @ 2010-2029 W/ alternate runs
 """
 
 def plot_data(var, case_a, case_b, weight_name, quantiles = [0.01,0.05,0.25,0.5,0.75,0.95,0.99]):
@@ -80,31 +76,6 @@ def boxplot_3(axis,bottom,mid,top,labels=False):
     box_rectangles(axis, top, y_top, thick, blue)
 #end def
 
-def boxplot_2(axis,CO2_land,CO2_pop,SRM_land,SRM_pop,labels=False):
-    """
-    Original figure 1 style
-    """
-    
-    # set y locations for bars
-    y_CO2_land, y_SRM_land = 0.16, 0.34
-    y_CO2_pop, y_SRM_pop = 0.66, 0.84
-
-    # set basic thickness
-    thick = 0.15
-    
-    axis.set_ylim(0,1)
-    axis.yaxis.set_major_locator(ticker.NullLocator())
-    
-    axis.plot([0,0],[0,1],'k',linewidth=1,zorder=0)
-    axis.axhline(0.5,color='grey',linewidth=0.6)
-    
-    # plot the shapes:
-    box_rectangles(axis, CO2_land, y_CO2_land, thick, red)
-    box_rectangles(axis, SRM_land, y_SRM_land, thick, blue)
-    box_rectangles(axis, CO2_pop, y_CO2_pop, thick, red)
-    box_rectangles(axis, SRM_pop, y_SRM_pop, thick, blue)
-#end def
-
 """
 ##################################
 #
@@ -115,165 +86,107 @@ FIGURE 1 GLENS
 
 fig = plt.figure(figsize=cm2inch(8.5,14))
 
-def fig1_land(var):
+def fig1_land(ax, var, mask):
     # get and then plot data
-    RCP85_land = plot_data(var, 'RCP8.5', 'Baseline', 'land_noice_area')
-    HALF_GLENS_land = plot_data(var, 'Half-GLENS', 'Baseline', 'land_noice_area')
-    FULL_GLENS_land = plot_data(var, 'Full-GLENS', 'Baseline', 'land_noice_area')
+    RCP85_land = plot_data(var, 'RCP8.5', 'Baseline', weight)
+    HALF_GLENS_land = plot_data(var, 'Half-GLENS', 'Baseline', weight)
+    FULL_GLENS_land = plot_data(var, 'Full-GLENS', 'Baseline', weight)
     
     boxplot_3(ax, RCP85_land, HALF_GLENS_land, FULL_GLENS_land)
 
-#TREFHT plot
-ax = fig.add_subplot(411)
+"""
+TREFHT plot
+"""
+ax1 = fig.add_subplot(411)
+ax=ax1
 
 # plot data!
 var = 'TREFHT'
-fig1_land(var)
+xlims=[-5,15]
+fig1_land(ax, var, weight)
     
 # set axes labels and title
 unit = '$^\circ$C'
 plt.xlabel('T anomaly ({unit})'.format(unit=unit))
-plt.xlim(-5,15)
+plt.xlim(xlims[0],xlims[1])
 
-# plt.text(3.5,0.35, "land area", ha='left',va='center')
-# plt.text(3.5,0.65, "population", ha='left',va='center')
+plt.text(1.3*xlims[0], 1.15, "a", clip_on=False, va="baseline", ha="left", fontsize=10, fontweight='bold')
 
-
-#TREFHTMX plot
-ax = fig.add_subplot(412)
+"""
+TREFHTMX plot
+"""
+ax2 = fig.add_subplot(412)
+ax=ax2
 
 # plot data!
 var = 'TREFHTMX'
-fig1_land(var)
+xlims=[-5,15]
+fig1_land(ax, var, weight)
     
 # set axes labels and title
 unit = '$^\circ$C'
 plt.xlabel('Tmax anomaly ({unit})'.format(unit=unit))
-plt.xlim(-5,15)
+plt.xlim(xlims[0],xlims[1])
 
+plt.text(1.3*xlims[0], 1.15, "b", clip_on=False, va="baseline", ha="left", fontsize=10, fontweight='bold')
 
-#P-E plot
-ax = fig.add_subplot(413)
+"""
+P-E plot
+"""
+ax3 = fig.add_subplot(413)
+ax=ax3
 
 # plot data!
 var = 'P-E'
-fig1_land(var)
+xlims = [-2.5,2.5]
+fig1_land(ax, var, weight)
     
 # set axes labels and title
 unit = 'mmDay$^{-1}$'
 plt.xlabel('P-E anomaly ({unit})'.format(unit=unit))
-plt.xlim(-2.5,2.5)
+plt.xlim(xlims[0],xlims[1])
 
+plt.text(1.15*xlims[0], 1.15, "c", clip_on=False, va="baseline", ha="left", fontsize=10, fontweight='bold')
 
-#PRECTMX plot
-ax = fig.add_subplot(414)
+"""
+PRECTMX plot
+"""
+ax4 = fig.add_subplot(414)
+ax=ax4
 
 # plot data!
 var = 'PRECTMX'
-fig1_land(var)
+xlims = [-160,160]
+fig1_land(ax, var, weight)
     
 # set axes labels and title
 unit = 'mmDay$^{-1}$'
 plt.xlabel('Pmax anomaly ({unit})'.format(unit=unit))
-plt.xlim(-160,160)
+plt.xlim(xlims[0],xlims[1])
 
+plt.text(1.15*xlims[0], 1.15, "d", clip_on=False, va="baseline", ha="left", fontsize=10, fontweight='bold')
+
+"""
+Plot legend
+"""
+# use empty plots
+plt.plot(0,0, color=blue, label='Full-GLENS')
+plt.plot(0,0, color=purple, label='Half-GLENS')
+plt.plot(0,0, color=red, label='RCP8.5')
+
+plt.legend(frameon=False)
 
 """
 Figure finalizing
 """
 
-plt.subplots_adjust(top=0.98, bottom=0.1, left=0.10, right=0.95, hspace=0.8,
+ax3.get_xaxis().set_ticks([-2.5,-2,-1.5,-1,-0.5,0,0.5,1.0,1.5,2.0,2.5])
+ax4.get_xaxis().set_ticks([-160,-120,-80,-40,0,40,80,120,160])
+
+plt.subplots_adjust(top=0.95, bottom=0.1, left=0.10, right=0.95, hspace=0.8,
                     wspace=0.35)
 
-plt.savefig(out_dir+'fig1.png', format='png', dpi=480)
-plt.savefig(out_dir+'fig1.eps', format='eps', dpi=480)
+plt.savefig(out_dir+out_filename+'.png', format='png', dpi=480)
+plt.savefig(out_dir+out_filename+'.eps', format='eps', dpi=480)
 
 plt.show()
-
-"""
-##################################
-#
-FIGURE 1 OLD STYLE
-#
-##################################
-"""
-
-# fig = plt.figure(figsize=cm2inch(8.5,14))
-
-# def fig1_land_pop(var):
-#     # get plot data
-#     RCP85_land = plot_data(var, 'RCP8.5', 'Baseline', 'land_noice_area')
-#     GLENS_land = plot_data(var, 'Full-GLENS', 'Baseline', 'land_noice_area')
-#     RCP85_pop = plot_data(var, 'RCP8.5', 'Baseline', 'pop')
-#     GLENS_pop = plot_data(var, 'Full-GLENS', 'Baseline', 'pop')
-
-#     print(max(RCP85_land), min(RCP85_land))
-    
-#     boxplot_2(ax, RCP85_land, RCP85_pop, GLENS_land, GLENS_pop)
-
-# #TREFHT plot
-# ax = fig.add_subplot(411)
-
-# var = 'TREFHT'
-
-# fig1_land_pop(var)
-    
-# # set axes labels and title
-# unit = '$^\circ$C'
-# plt.xlabel('T anomaly ({unit})'.format(unit=unit))
-# plt.xlim(-5,15)
-
-# plt.text(3.5,0.35, "land area", ha='left',va='center')
-# plt.text(3.5,0.65, "population", ha='left',va='center')
-
-
-# #TREFHTMX plot
-# ax = fig.add_subplot(412)
-
-# var = 'TREFHTMX'
-
-# fig1_land_pop(var)
-    
-# # set axes labels and title
-# unit = '$^\circ$C'
-# plt.xlabel('Tmax anomaly ({unit})'.format(unit=unit))
-# plt.xlim(-5,15)
-
-
-# #P-E plot
-# ax = fig.add_subplot(413)
-
-# var = 'P-E'
-
-# fig1_land_pop(var)
-    
-# # set axes labels and title
-# unit = 'mmDay$^{-1}$'
-# plt.xlabel('P-E anomaly ({unit})'.format(unit=unit))
-# plt.xlim(-2.5,2.5)
-
-
-# #PRECTMX plot
-# ax = fig.add_subplot(414)
-
-# var = 'PRECTMX'
-
-# fig1_land_pop(var)
-    
-# # set axes labels and title
-# unit = 'mmDay$^{-1}$'
-# plt.xlabel('Pmax anomaly ({unit})'.format(unit=unit))
-# plt.xlim(-160,160)
-
-
-# """
-# Figure finalizing
-# """
-
-# plt.subplots_adjust(top=0.98, bottom=0.1, left=0.10, right=0.95, hspace=0.8,
-#                     wspace=0.35)
-
-# plt.savefig(out_dir+'fig1_orig_full-glens.png', format='png', dpi=480)
-# plt.savefig(out_dir+'fig1_orig_full-glens.eps', format='eps', dpi=480)
-
-# plt.show()

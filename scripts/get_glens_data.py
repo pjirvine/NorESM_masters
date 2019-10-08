@@ -136,7 +136,7 @@ def get_glens_annual(var, exp, run, file_years):
 """
 Functions to process ensemble for given var and case
 """
-def ensemble_process(var,case):
+def ensemble_process(var,case, timeseries=False):
     """
     For the given case and var generate the ensemble mean and standard deviation results
     CASES:
@@ -151,18 +151,24 @@ def ensemble_process(var,case):
     'Half-GLENS-2'   - Scaled Half-GLENS  @ 2075-2094  W/ alternate runs
     """
     
-    def ensemble_stats(ens_data):
+    def ensemble_stats(ens_data, timeseries):
         """
         Calculates the mean and standard deviation using all years in all ensemble members
         INPUT: ens_data = list[ output of GET_GLENS_ANNUAL() ] = list of data[lon,lat,time]
-        OUTPUT: list[ ens_mean[lon,lat], ens_std[lon,lat] ]
+        timeseries = False --> OUTPUT: list[ ens_mean[lon,lat], ens_std[lon,lat] ]
+        timeseries = True --> OUTPUT: list[ ens_combined[lon,lat,time], ens_mean[lon,lat,time], ens_std[lon,lat,time] ]       
         """
 
-        ens_combined = np.concatenate(ens_data, axis=2)
-        ens_mean = np.mean(ens_combined, axis=2)
-        ens_std = np.std(ens_combined, axis=2)
-
-        return ens_mean, ens_std
+        if timeseries:
+            ens_combined = np.stack(ens_data, axis=3)
+            ens_mean = np.mean(ens_combined, axis=3)
+            ens_std = np.std(ens_combined, axis=3)
+            return ens_mean, ens_std
+        else: 
+            ens_combined = np.concatenate(ens_data, axis=2)
+            ens_mean = np.mean(ens_combined, axis=2)
+            ens_std = np.std(ens_combined, axis=2)
+            return ens_mean, ens_std
     #end def
     
     """
@@ -199,27 +205,27 @@ def ensemble_process(var,case):
     if case == 'Baseline':
         full_data = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
         reduced_data = [ IDX[:,:,t_index_baseline] for IDX in full_data ]
-        return ensemble_stats(reduced_data)
+        return ensemble_stats(reduced_data, timeseries)
     # RCP8.5 @ 2075-2094
     elif case == 'RCP8.5':
         full_data = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
         reduced_data = [ IDX[:,:,t_index_control] for IDX in full_data ]
-        return ensemble_stats(reduced_data)
+        return ensemble_stats(reduced_data, timeseries)
     # GLENS @ 2075-2094
     elif case == 'Full-GLENS':
         full_data = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in core_runs]
         reduced_data = [ IDX[:,:,t_index_feedback] for IDX in full_data ]
-        return ensemble_stats(reduced_data)
+        return ensemble_stats(reduced_data, timeseries)
     # Half-GLENS = RCP8.5 + 0.5*(GLENS-RCP8.5) @ 2075-2094
     elif case == 'Half-GLENS':
         # Get Full-GLENS data
         full_data_GLENS = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in core_runs]
         reduced_data_GLENS = [ IDX[:,:,t_index_feedback] for IDX in full_data_GLENS ]
-        GLENS_stats = ensemble_stats(reduced_data_GLENS)
+        GLENS_stats = ensemble_stats(reduced_data_GLENS, timeseries)
         # Get RCP8.5 data
         full_data_RCP85 = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
         reduced_data_RCP85 = [ IDX[:,:,t_index_control] for IDX in full_data_RCP85 ]
-        RCP85_stats = ensemble_stats(reduced_data_RCP85)
+        RCP85_stats = ensemble_stats(reduced_data_RCP85, timeseries)
 
         # Half-GLENS stats
         HalfGLENS_mean = RCP85_stats[0] + 0.5 * (GLENS_stats[0] - RCP85_stats[0])
@@ -231,15 +237,15 @@ def ensemble_process(var,case):
         # Get Full-GLENS data @ 2044-2063
         full_data_GLENS = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in core_runs]
         reduced_data_GLENS_44_63 = [ IDX[:,:,t_index_feedback_half] for IDX in full_data_GLENS ]
-        GLENS_stats_44_63 = ensemble_stats(reduced_data_GLENS_44_63)
+        GLENS_stats_44_63 = ensemble_stats(reduced_data_GLENS_44_63, timeseries)
         # Get RCP8.5 data @ 2044-2063
         full_data_RCP85 = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
         reduced_data_RCP85_44_63 = [ IDX[:,:,t_index_control_half] for IDX in full_data_RCP85 ]
-        RCP85_stats_44_63 = ensemble_stats(reduced_data_RCP85_44_63)
+        RCP85_stats_44_63 = ensemble_stats(reduced_data_RCP85_44_63, timeseries)
         # Get RCP8.5 data @ 2075-2094
         full_data_RCP85 = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
         reduced_data_RCP85 = [ IDX[:,:,t_index_control] for IDX in full_data_RCP85 ]
-        RCP85_stats = ensemble_stats(reduced_data_RCP85)
+        RCP85_stats = ensemble_stats(reduced_data_RCP85, timeseries)
         
         # Half-GLENS stats
         HalfGLENS_time_mean = RCP85_stats[0] + (GLENS_stats_44_63[0] - RCP85_stats_44_63[0])
@@ -250,7 +256,7 @@ def ensemble_process(var,case):
     if case == 'Baseline-2':
         full_data = [get_glens_annual(var, 'control', IDX, control_short_file_years) for IDX in alt_runs]
         reduced_data = [ IDX[:,:,t_index_baseline] for IDX in full_data ]
-        return ensemble_stats(reduced_data)
+        return ensemble_stats(reduced_data, timeseries)
     #
     #### NO ALTERNATE RUNS AVAILABLE FOR RCP8.5 @ 2075-2094
     #
@@ -258,17 +264,17 @@ def ensemble_process(var,case):
     elif case == 'Full-GLENS-2':
         full_data = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in alt_runs]
         reduced_data = [ IDX[:,:,t_index_feedback] for IDX in full_data ]
-        return ensemble_stats(reduced_data)
+        return ensemble_stats(reduced_data, timeseries)
     # Half-GLENS -2 = RCP8.5 + 0.5*(GLENS-RCP8.5) @ 2075-2094  W/ alternate runs
     elif case == 'Half-GLENS-2':
         # Get Full-GLENS data
         full_data_GLENS = [get_glens_annual(var, 'feedback', IDX, feedback_file_years) for IDX in alt_runs]
         reduced_data_GLENS = [ IDX[:,:,t_index_feedback] for IDX in full_data_GLENS ]
-        GLENS_stats = ensemble_stats(reduced_data_GLENS)
+        GLENS_stats = ensemble_stats(reduced_data_GLENS, timeseries)
         # Get RCP8.5 data
         full_data_RCP85 = [get_glens_annual(var, 'control', IDX, control_file_years) for IDX in core_runs]
         reduced_data_RCP85 = [ IDX[:,:,t_index_feedback] for IDX in full_data_RCP85 ]
-        RCP85_stats = ensemble_stats(reduced_data_RCP85)
+        RCP85_stats = ensemble_stats(reduced_data_RCP85, timeseries)
 
         # Half-GLENS stats
         HalfGLENS_mean = RCP85_stats[0] + 0.5 * (GLENS_stats[0] - RCP85_stats[0])
