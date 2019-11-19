@@ -1,11 +1,11 @@
 #!/bin/bash
 #
 #SBATCH -J feedback_monthly
-#SBATCH -p general                # partition (queue)
+#SBATCH -p shared                # partition (queue)
 #SBATCH -N 1                      # number of nodes
 #SBATCH -n 1                      # number of cores
 #SBATCH --mem=3000                 # memory pool for all cores
-#SBATCH -t 0-00:30                 # time (D-HH:MM)
+#SBATCH -t 0-02:00                 # time (D-HH:MM)
 #SBATCH -o /n/home03/pjirvine/slurm/out/SLURM.%j.%N.out        # STDOUT
 #SBATCH -e /n/home03/pjirvine/slurm/err/SLURM.%j.%N.err        # STDERR
 #SBATCH --mail-type=ALL

@@ -63,14 +63,26 @@ def get_glens_masks_weights():
     land_ga_file = 'CCSM4_land_no_gr_ant.nc'
     f = Dataset(glen_dir + land_ga_file).variables['sftlf'][:].squeeze()
     land_noice_data = f
-    masks_weights['land_noice_mask'] = land_noice_data > 0.5
+    masks_weights['land_noice_mask'] = np.transpose(land_noice_data > 0.5)
 
     # land mask
     land_file = 'sftlf_CCSM4.nc'
     f = Dataset(glen_dir + land_file).variables['sftlf'][:].squeeze()
     land_data = f
-    masks_weights['land_mask'] = land_data > 0.5
+    masks_weights['land_mask'] = np.transpose(land_data > 0.5)
 
+    # land_noice fraction
+    land_ga_file = 'CCSM4_land_no_gr_ant.nc'
+    f = Dataset(glen_dir + land_ga_file).variables['sftlf'][:].squeeze()
+    land_noice_data = f
+    masks_weights['land_noice_frac'] = np.transpose(land_noice_data)
+
+    # land mask fraction
+    land_file = 'sftlf_CCSM4.nc'
+    f = Dataset(glen_dir + land_file).variables['sftlf'][:].squeeze()
+    land_data = f
+    masks_weights['land_frac'] = np.transpose(land_data)
+    
     """
     Weights
     """
@@ -79,13 +91,13 @@ def get_glens_masks_weights():
     pop_file = 'CCSM4_pop.nc'
     f = Dataset(glen_dir + pop_file).variables['pop'][:].squeeze()
     pop_data = f
-    masks_weights['pop'] = pop_data / np.sum(pop_data)
+    masks_weights['pop'] = np.transpose(pop_data / np.sum(pop_data))
 
     # ag weight
     ag_file = 'CCSM4_agriculture.nc'
     f = Dataset(glen_dir + ag_file).variables['fraction'][:].squeeze()
     ag_data = f
-    masks_weights['ag'] = ag_data / np.sum(ag_data)
+    masks_weights['ag'] = np.transpose(ag_data / np.sum(ag_data))
  
     # area weight
     weight_file = 'CCSM4_gridweights.nc'
@@ -93,15 +105,15 @@ def get_glens_masks_weights():
     # get area weight, turn to array, squeeze off extra dims
     f = Dataset(glen_dir + weight_file).variables['cell_weights'][:].squeeze()
     weight_data = f
-    masks_weights['area'] = weight_data # sums to 1.0
+    masks_weights['area'] = np.transpose(weight_data) # sums to 1.0
 
     # land area weight
     temp_data = land_data * weight_data
-    masks_weights['land_area'] = temp_data / np.sum(temp_data)
+    masks_weights['land_area'] = np.transpose(temp_data / np.sum(temp_data))
 
     # land_noice area weight
     temp_data = land_noice_data * weight_data
-    masks_weights['land_noice_area'] = temp_data / np.sum(temp_data)
+    masks_weights['land_noice_area'] = np.transpose(temp_data / np.sum(temp_data))
     
     # 'land_mask', 'land_noice_mask'
     # 'pop', 'ag', 'area', 'land_area', 'land_noice_area'

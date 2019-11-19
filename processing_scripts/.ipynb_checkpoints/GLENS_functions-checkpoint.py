@@ -61,7 +61,8 @@ def PE_maker(run_name, in_dir, out_dir):
     file_1 = in_dir + run_name.format(var='LHFLX')
 
     # convert Wm-2 to M/s using latent heat of vaporization
-    lhflx_prect = 1 / (2.26*10**9)
+    # L = 2.5 MJ kg-1 (latent heat of evaporation of water) - checked by comparing PRECT and LHFLX global means
+    lhflx_prect = 1 / (2.50*10**9)
 
     cdo.mulc(lhflx_prect, input=file_1, output='temp_evap.nc')
 

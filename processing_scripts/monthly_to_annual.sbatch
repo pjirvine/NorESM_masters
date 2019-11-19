@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH -J monthly_to_annual
-#SBATCH -p general                # partition (queue)
+#SBATCH -p shared                # partition (queue)
 #SBATCH -N 1                      # number of nodes
 #SBATCH -n 1                      # number of cores
 #SBATCH --mem=3000                 # memory pool for all cores

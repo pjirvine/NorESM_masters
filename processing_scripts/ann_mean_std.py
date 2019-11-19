@@ -22,7 +22,7 @@ control_runs = ['001','002','003','021']
 control_short_runs = [x for x in feedback_runs if x not in control_runs]
 
 # VARIABLES
-variables = ['TREFHT','TREFHTMX','PRECTMX','P-E','PRECT']
+variables = ['TREFHT','TREFHTMX','PRECTMX','P-E','PRECT','QFLX']
 
 # DATES
 date_feedback = '202001-209912'
@@ -53,7 +53,7 @@ def time_mean_std(name, years, run, var, date_in, date_out):
     This function calculates the means and standard deviations
     """
     # name has to be in this format: "feedback.{run}.cam.h0.{var}.{date}.{append}"
-    
+
     # Time stat function
     def timestat(in_dir, in_name, out_dir, out_name, years, stat):
         cdo.selyear(years, input=in_dir+in_name, output='temp.nc')
@@ -63,23 +63,23 @@ def time_mean_std(name, years, run, var, date_in, date_out):
             cdo.timstd(input='temp.nc', output=out_dir+out_name)
         else:
             return "enter mean or std for stat"
-    
+
     # Format input and output names
     in_name = name.format(run=run,var=var,date=date_in,append='nc')
     out_name_mean = name.format(run=run,var=var,date=date_out,append='annmean.nc')
     out_name_std = name.format(run=run,var=var,date=date_out,append='annstd.nc')
-    
+
     # Calculate mean and STD
     timestat(in_dir, in_name, out_dir, out_name_mean, years, 'mean')
     timestat(in_dir, in_name, out_dir, out_name_std, years, 'std')
 #end def
-    
+
 """
 Start main loops
 """
-    
+
 for var in variables:
-    
+
     # Control long - for EXP and baseline
     for run in control_runs:
 

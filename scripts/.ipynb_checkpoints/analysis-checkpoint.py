@@ -442,7 +442,7 @@ def types_groups_from_bools(bool_dict, ratio):
                   'not_small': td.A2 + td.A3 + td.A4 + td.B4,
                   'certain': td.A2 + td.A3 + td.A4,
                   'dont_know_small': td.A1 + td.B1 + td.B2 + td.B3,
-                  'dont_know_big': td.B4,
+                  'dont_know_big_none': td.B4 * (ratio > 0),
                   'dont_know_big_over': td.B4 * (ratio < 0),
                   'better_off_perfect': td.A3,
                   'better_off_under': td.A4 * (0 < ratio) * (ratio < 1),
@@ -488,5 +488,53 @@ def better_worse_off(SRM_mean, SRM_std, CO2_mean, CO2_std, CTRL_mean, CTRL_std, 
     type_dict, group_dict = types_groups_from_bools(bool_dict, ratio)
     
     return group_dict['better_off'], group_dict['worse_off'], group_dict['dont_know']
-
 # End def
+
+"""
+This function categorizes the relationship between the 3 anomalies.
+"""
+
+def all_anom_relations(SRM_mean, SRM_std, CO2_mean, CO2_std, CTRL_mean, CTRL_std, nyears, ttest_level):
+    """
+    This works only for a single set of values, no numpy arrays!
+    """                                                             
+                                                                        
+    # define anomalies
+    CO2_anom = CO2_mean - CTRL_mean
+    SRM_anom = SRM_mean - CTRL_mean
+
+    # ratio of anomalies
+    try: # check for divide by zero error and create very big number instead
+        ratio = SRM_anom / CO2_anom
+    except ZeroDivisionError:
+        ratio = np.sign(SRM_anom) * 9.999*10**99
+
+    # absolute_double_anom T-Test
+    ttest_1 = ttest_sub(abs(SRM_anom), SRM_std, nyears,
+                        abs(CO2_anom), CO2_std, nyears) < ttest_level
+    # CO2, ctrl T-Test
+    ttest_2 = ttest_sub(CO2_mean, CO2_std, nyears,
+                        CTRL_mean, CTRL_std, nyears) < ttest_level
+    # SRM, ctrl T-Test
+    ttest_3 = ttest_sub(SRM_mean, SRM_std, nyears,
+                        CTRL_mean, CTRL_std, nyears) < ttest_level
+    
+    # This geomip_data.py function returns dictionary of combinations of results
+    bool_dict = bools_x8_3ttests(ttest_1,ttest_2,ttest_3)
+    
+    # This geomip_data.py function returns dictionary of types of results
+    type_dict, group_dict = types_groups_from_bools(bool_dict, ratio)
+    
+    # a mutually exclusive list of anomaly relationships 
+    group_dict_exclusive_list=['dont_know_small','dont_know_big_none','dont_know_big_over',
+                          'better_off_perfect','better_off_under','better_off_over',
+                          'worse_off_novel','worse_off_exacerbate','worse_off_too_much']
+    
+    anoms_type = [IDX for IDX in group_dict_exclusive_list if group_dict[IDX]]
+    if len(anoms_type) != 1:
+        print('too many elements:',anoms_type)
+    else:
+        return anoms_type[0]
+# End def
+
+

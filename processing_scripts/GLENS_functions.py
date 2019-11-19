@@ -20,7 +20,7 @@ def merge_years(run_name, append, in_dir, out_dir):
     # This function finds all files that match the search and merges them.
     # If there is only 1 file it is copied to output directory.
     # run_data defines everything but year in filename.
-    
+
     # FIRST - search for and return all matching netcdf files
     # search command that is executed in linux
     search_command = 'ls {directory}{search}'.format(directory=in_dir,search=run_name+'*.nc')
@@ -28,9 +28,9 @@ def merge_years(run_name, append, in_dir, out_dir):
     temp1=linux_out(search_command)
     # replace new lines ("\n") with spaces.
     temp2 = temp1.replace("\n"," ")
-    
+
     cdo.mergetime(input=temp2, output=out_dir + run_name + append)
-    
+
     return cdo.showyear(input=out_dir + run_name + append)
 
 
@@ -38,55 +38,59 @@ def merge_years(run_name, append, in_dir, out_dir):
 def PE_maker(run_name, in_dir, out_dir):
     """
     Makes PRECT and P-E monthly files out of PRECC, PRECL and LHFLX input files.
-    
+
     !!! NOTE !!!
     run_name must include {var}, e.g. be of form: "feedback.021.cam.h0.{var}.202001-209912.nc"
     !!!      !!!
     """
-    
+
     """
     make PRECT
     """
-    
+
     file_1 = in_dir + run_name.format(var='PRECC')
     file_2 = in_dir + run_name.format(var='PRECL')
 
     cdo.add(input=file_1 + " " + file_2, output='temp.nc')
     cdo.chname('PRECC','PRECT', input = 'temp.nc', output= out_dir + run_name.format(var='PRECT'))
-    
-    """
-    Evap = LHFLX * C
-    """
 
-    file_1 = in_dir + run_name.format(var='LHFLX')
-
-    # convert Wm-2 to M/s using latent heat of vaporization
-    lhflx_prect = 1 / (2.26*10**9)
-
-    cdo.mulc(lhflx_prect, input=file_1, output='temp_evap.nc')
+    # """
+    # Evap = LHFLX * C - OLD LHFLX VERSION
+    # """
+    #
+    # file_1 = in_dir + run_name.format(var='LHFLX')
+    #
+    # # convert Wm-2 to M/s using latent heat of vaporization
+    # # L = 2.5 MJ kg-1 (latent heat of evaporation of water) - checked by comparing PRECT and LHFLX global means
+    # lhflx_prect = 1 / (2.50*10**9)
+    #
+    # cdo.mulc(lhflx_prect, input=file_1, output='temp_evap.nc')
 
     """
     P-E = PRECT - EVAP
     """
 
-    file_1 = out_dir + run_name.format(var='PRECT')
-    file_2 = 'temp_evap.nc'
+    file_1 = out_dir + run_name.format(var='PRECT') # m/s
+    file_2 = in_dir + run_name.format(var='QFLX') # kg/m-2/s'temp_evap.nc'
+    file_2_ms = cdo.mulc(0.001, input=file_2)
 
-    cdo.sub(input = file_1 + ' ' + file_2, output = 'temp_pe.nc')
+    cdo.sub(input = file_1 + ' ' + file_2_ms, output = 'temp_pe.nc')
     cdo.chname('PRECT','P-E', input = 'temp_pe.nc', output= out_dir + run_name.format(var='P-E'))
 
-    
+
 def ann_stats(run_name, in_dir, out_dir):
     """
     Makes PRECT and P-E monthly files out of PRECC, PRECL and LHFLX input files.
-    
+
     !!! NOTE !!!
     run_name must include {var}, e.g. be of form: "feedback.021.cam.h0.{var}.202001-209912.nc"
     !!!      !!!
-    
+
     will output file with name of form: "feedback.021.cam.h0.{var}.ann.202001-209912.nc"
     """
     var = 'PRECT'    # PRECT - ann mean
+    cdo.yearmonmean(input = in_dir + run_name.format(var=var), output = out_dir + run_name.format(var=var+'.ann'))
+    var = 'QFLX'    # QFLX - ann mean
     cdo.yearmonmean(input = in_dir + run_name.format(var=var), output = out_dir + run_name.format(var=var+'.ann'))
     var = 'P-E'    # P-E - ann mean
     cdo.yearmonmean(input = in_dir + run_name.format(var=var), output = out_dir + run_name.format(var=var+'.ann'))
@@ -96,7 +100,7 @@ def ann_stats(run_name, in_dir, out_dir):
     cdo.yearmax(input = in_dir + run_name.format(var=var), output = out_dir + run_name.format(var=var+'.ann'))
     var = 'TREFHTMX'    # TREFHTMX - ann max
     cdo.yearmax(input = in_dir + run_name.format(var=var), output = out_dir + run_name.format(var=var+'.ann'))
-    
+
 #end def
 
 def time_mean_std(name, years, run, var, date_in, date_out):
@@ -104,7 +108,7 @@ def time_mean_std(name, years, run, var, date_in, date_out):
     This function calculates the means and standard deviations
     """
     # name has to be in this format: "feedback.{run}.cam.h0.{var}.{date}.{append}"
-    
+
     # Time stat function
     def timestat(in_dir, in_name, out_dir, out_name, years, stat):
         cdo.selyear(years, input=in_dir+in_name, output='temp.nc')
@@ -115,7 +119,7 @@ def time_mean_std(name, years, run, var, date_in, date_out):
         else:
             return "enter mean or std for stat"
 #end def
-    
+
 def linux_out(command):
     import os
     # command = string as typed into linux terminal
@@ -130,7 +134,7 @@ This function makes an SBATCH script called "sbatch_filename" which runs the scr
 The properties of the job will be set by the key words.
 REMEMBER - This sbatch job will inherit
 """
-    
+
     slurm_template = """#!/bin/bash
 #
 #SBATCH -J {JOB}
@@ -158,7 +162,7 @@ REMEMBER - This sbatch job will inherit
     # Write to file given by sbatch_filename
     with open(sbatch_filename, "w") as text_file:
         text_file.write(sbatch_text)
-    
+
     # Return contents of sbatch file
     return sbatch_text
 

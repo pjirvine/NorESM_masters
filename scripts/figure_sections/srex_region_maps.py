@@ -106,6 +106,8 @@ def make_plot_data(var, regional_data_dict, anom_type='units', ttest_level=0.1, 
         plot_dict['centre'] = SREX_region_centres[SREX_abvs.index(SREX)]
         plot_dict['displace'] = [0,0] # these will be edited later
         
+        # calculate various anomaly types
+        
         # calculate number of STDs from control for 90% T-Test:
         num_ctrl_stds = num_stds_ttest(nyears, ttest_level)
         
@@ -129,12 +131,38 @@ def make_plot_data(var, regional_data_dict, anom_type='units', ttest_level=0.1, 
         ttest_plevel = ttest_sub(regional_data_dict[var]['RCP8.5'][0][SREX], regional_data_dict[var]['RCP8.5'][1][SREX], nyears, regional_data_dict[var]['Full-GLENS'][0][SREX], regional_data_dict[var]['Full-GLENS'][1][SREX], nyears)
         plot_dict['ttest_anoms'] = ttest_plevel < ttest_level
         
+        # Evaluate type of anomaly relationship for region (e.g. better_off but flipped sign, etc.)
+        plot_dict['full_type']= all_anom_relations(regional_data_dict[var]['Full-GLENS'][0][SREX], regional_data_dict[var]['Full-GLENS'][1][SREX],
+                                                   regional_data_dict[var]['RCP8.5'][0][SREX], regional_data_dict[var]['RCP8.5'][1][SREX],
+                                                   regional_data_dict[var]['Baseline'][0][SREX], regional_data_dict[var]['Baseline'][1][SREX],
+                                                   nyears, ttest_level)
+        plot_dict['half_type']= all_anom_relations(regional_data_dict[var]['Half-GLENS'][0][SREX], regional_data_dict[var]['Half-GLENS'][1][SREX],
+                                                   regional_data_dict[var]['RCP8.5'][0][SREX], regional_data_dict[var]['RCP8.5'][1][SREX],
+                                                   regional_data_dict[var]['Baseline'][0][SREX], regional_data_dict[var]['Baseline'][1][SREX],
+                                                   nyears, ttest_level)
+        
+        # define function to specify number format - longwinded!
         def num_format(num, anom_type):
-            string = f'{num:.2f}'
-            if num > 0:
-                string = "+"+string
+            from math import log10, floor
+            def rounder(num, sig=3):
+                return round(num, sig-int(floor(log10(abs(num))))-1)
+            #enddef
+            if abs(num)>=100:
+                string = "{:+3.0f}".format(num)
+            elif abs(num)>10:
+                num_r = rounder(num, sig=3)
+                string = "{:+3.1f}".format(num_r)
+            elif abs(num)>1:
+                num_r = rounder(num, sig=3)
+                string = "{:+3.2f}".format(num_r)
+            elif abs(num)>0.1:
+                num_r = rounder(num, sig=2)
+                string = "{:+3.2f}".format(num_r)
+            else:
+                num_r = rounder(num, sig=1)
+                string = "{:+3.2f}".format(num_r)
             if anom_type == 'pc':
-                string = string + '%'
+                string = string + "%"
             return string
                    
         plot_dict['anom_85_text'] = num_format(plot_dict['anom_85'],anom_type)
@@ -145,6 +173,28 @@ def make_plot_data(var, regional_data_dict, anom_type='units', ttest_level=0.1, 
                    
     return SREX_plot_dict
 #end def make_plot_data()
+
+def num_region_types(plot_data):
+    """
+    This function returns a dictionary listing the number of regions with each type of anom relationship
+    """
+
+    # a mutually exclusive list of anomaly relationships 
+    group_dict_exclusive_list=['dont_know_small','dont_know_big_none','dont_know_big_over',
+                          'better_off_perfect','better_off_under','better_off_over',
+                          'worse_off_novel','worse_off_exacerbate','worse_off_too_much']
+    SREX_abvs = ['ALA', 'CGI', 'WNA', 'CNA', 'ENA', 'CAM', 'AMZ', 'NEB', 'WSA', 'SSA', 'NEU', 'CEU', 'MED', 'SAH', 'WAF', 'EAF', 'SAF', 'NAS', 'WAS', 'CAS', 'TIB', 'EAS', 'SAS', 'SEA', 'NAU', 'SAU']
+
+    region_types_full = [plot_data[IDX]['full_type'] for IDX in SREX_abvs]
+    region_types_half = [plot_data[IDX]['half_type'] for IDX in SREX_abvs]
+
+    full_type_num_dict = {}
+    half_type_num_dict = {}
+    for anom_type in group_dict_exclusive_list:
+        full_type_num_dict[anom_type] = len([IDX for IDX in region_types_full if IDX is anom_type])
+        half_type_num_dict[anom_type] = len([IDX for IDX in region_types_half if IDX is anom_type])
+
+    return full_type_num_dict, half_type_num_dict
 
 """
 Create nested dictionary with regional means and stds.
@@ -197,7 +247,7 @@ displace_dict = {'CAM': [-5.0,-5.0],
                  'SAU': [10.,-5.],
                 }
 
-def plot_srex_region_map(var_regions,out_loc):
+def plot_srex_region_map(var_regions,out_loc, title):
     """
     Function to plot srex region map
     """
@@ -246,6 +296,7 @@ def plot_srex_region_map(var_regions,out_loc):
         # Set some plotting standards
         thick = 0.3
         bar_loc = 0.6
+        text_shift = 0.05
 
         """
         Create the background and anomalies
@@ -281,8 +332,8 @@ def plot_srex_region_map(var_regions,out_loc):
         Add the text values
         """
         #text
-        axis.text(x_loc - bar_loc * half_width, y_loc + 1.05*half_width, text_1,  horizontalalignment='center', verticalalignment='bottom', fontsize=8, zorder=4)
-        axis.text(x_loc + bar_loc * half_width, y_loc + 1.05*half_width, text_2,  horizontalalignment='center', verticalalignment='bottom', fontsize=8, zorder=4)
+        axis.text(x_loc - (bar_loc - text_shift) * half_width, y_loc + 1.05*half_width, text_1,  horizontalalignment='center', verticalalignment='bottom', fontsize=8, zorder=4)
+        axis.text(x_loc + (bar_loc - text_shift) * half_width, y_loc + 1.05*half_width, text_2,  horizontalalignment='center', verticalalignment='bottom', fontsize=8, zorder=4)
         ### FIN ###
     #end def mini_panels()
     
@@ -301,6 +352,7 @@ def plot_srex_region_map(var_regions,out_loc):
     Create SREX mask used as base for summary plot
     """
     ax = regionmask.defined_regions.srex.plot(add_label=False, line_kws={'zorder':1, 'linewidth':1})
+    plt.title(title, fontsize = 16)
     plt.tight_layout()
 
     """
@@ -325,16 +377,16 @@ Actually Make the Plots!
 out_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/figures/'
 
 # Plot T
-plot_srex_region_map(TREFHT_regions,out_dir + 'TREFHT_SREX_region_map')
+plot_srex_region_map(TREFHT_regions,out_dir + 'TREFHT_SREX_region_map', 'Surface Air Temperature (T, $^\circ$C)')
 
 # Plot Tmax
-plot_srex_region_map(TREFHTMX_regions,out_dir + 'TREFHTMX_SREX_region_map')
+plot_srex_region_map(TREFHTMX_regions,out_dir + 'TREFHTMX_SREX_region_map', 'Max. Surface Air Temperature (Tmax, $^\circ$C)')
 
 # Plot P
-plot_srex_region_map(PRECT_regions,out_dir + 'PRECT_SREX_region_map')
+plot_srex_region_map(PRECT_regions,out_dir + 'PRECT_SREX_region_map', 'Precipitation (P, mmDay$^{-1}$)')
 
 # Plot Pmax
-plot_srex_region_map(PRECTMX_regions,out_dir + 'PRECTMX_SREX_region_map')
+plot_srex_region_map(PRECTMX_regions,out_dir + 'PRECTMX_SREX_region_map', 'Max. Precipitation (Pmax, mmDay$^{-1}$)')
 
 # Plot P-E
-plot_srex_region_map(PE_regions,out_dir + 'P-E_SREX_region_map')
+plot_srex_region_map(PE_regions,out_dir + 'P-E_SREX_region_map', 'Precipitation minus Evaporation (P-E, mmDay$^{-1}$)')

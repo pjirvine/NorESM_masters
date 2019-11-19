@@ -31,7 +31,7 @@ feedback_name = "feedback.{run}.cam.h0.{var}.202001-209912.nc"
 control_name_long = "control.{run}.cam.h0.{var}.201001-209912.nc"
 control_name_short = "control.{run}.cam.h0.{var}.201001-203012.nc"
 
-in_dir = "/n/home03/pjirvine/keithfs1_pji/GLENS/temp_merged/"
+in_dir = "/n/home03/pjirvine/keithfs1_pji/GLENS/combined_monthly_data/"
 out_dir = "/n/home03/pjirvine/keithfs1_pji/GLENS/temp_p_pe/"
 
 """
