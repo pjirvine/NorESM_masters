@@ -24,7 +24,7 @@ def get_regions_for_mean(region_fileloc, region_name_list, data_shape, mask=None
         if mask is None:
             pass
         else:
-            region_1 = region_1 * mask
+            region_1 = region_1 * np.transpose(mask)
         # normalize region
         return region_1 / np.sum(region_1)
     # End DEF

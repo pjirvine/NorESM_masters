@@ -86,6 +86,8 @@ FIGURE 1 GLENS
 
 fig = plt.figure(figsize=cm2inch(8.5,14))
 
+plt.rcParams.update({'font.size': 8})
+
 def fig1_land(ax, var, mask):
     # get and then plot data
     RCP85_land = plot_data(var, 'RCP8.5', 'Baseline', weight)
@@ -102,7 +104,7 @@ ax=ax1
 
 # plot data!
 var = 'TREFHT'
-xlims=[-5,15]
+xlims=[-2,12]
 fig1_land(ax, var, weight)
     
 # set axes labels and title
@@ -120,7 +122,7 @@ ax=ax2
 
 # plot data!
 var = 'TREFHTMX'
-xlims=[-5,15]
+xlims=[-5,20]
 fig1_land(ax, var, weight)
     
 # set axes labels and title
@@ -138,7 +140,7 @@ ax=ax3
 
 # plot data!
 var = 'P-E'
-xlims = [-2.5,2.5]
+xlims = [-1.5,1.5]
 fig1_land(ax, var, weight)
     
 # set axes labels and title
@@ -156,7 +158,7 @@ ax=ax4
 
 # plot data!
 var = 'PRECTMX'
-xlims = [-160,160]
+xlims = [-120,120]
 fig1_land(ax, var, weight)
     
 # set axes labels and title
@@ -174,14 +176,16 @@ plt.plot(0,0, color=blue, label='Full-GLENS')
 plt.plot(0,0, color=purple, label='Half-GLENS')
 plt.plot(0,0, color=red, label='RCP8.5')
 
-plt.legend(frameon=False)
+plt.legend(frameon=False, loc=3, bbox_to_anchor=(-0.01, -0.08))
 
 """
 Figure finalizing
 """
 
-ax3.get_xaxis().set_ticks([-2.5,-2,-1.5,-1,-0.5,0,0.5,1.0,1.5,2.0,2.5])
-ax4.get_xaxis().set_ticks([-160,-120,-80,-40,0,40,80,120,160])
+ax3.get_xaxis().set_ticks([-1.5,-1,-0.5,0,0.5,1.0,1.5])
+ax4.get_xaxis().set_ticks([-120,-80,-40,0,40,80,120])
+# ax3.get_xaxis().set_ticks([-2.5,-2,-1.5,-1,-0.5,0,0.5,1.0,1.5,2.0,2.5])
+# ax4.get_xaxis().set_ticks([-160,-120,-80,-40,0,40,80,120,160])
 
 plt.subplots_adjust(top=0.95, bottom=0.1, left=0.10, right=0.95, hspace=0.8,
                     wspace=0.35)
