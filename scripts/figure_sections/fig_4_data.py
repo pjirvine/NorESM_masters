@@ -63,8 +63,8 @@ def frac_figure_data(frac, var_list, all_data, all_masks, weight_name = 'land_no
         """
 
         inner_dict[var+'_global'] = np.sum(frac_anom * global_weight)
-        inner_dict[var+'_abs'] = abs_anom
-        inner_dict[var+'_abs_std'] = abs_std_anom
+        inner_dict[var+'_abs'] = np.sum(abs_anom * weight)
+        inner_dict[var+'_abs_std'] = np.sum(abs_std_anom * weight)
         inner_dict[var+'_RMS'] = RMS
         inner_dict[var+'_RMS_std'] = RMS_std
         inner_dict[var+'_mod'] = np.sum(better.flatten() * weight)
