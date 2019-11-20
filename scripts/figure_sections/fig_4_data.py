@@ -43,6 +43,13 @@ def frac_figure_data(frac, var_list, all_data, all_masks, weight_name = 'land_no
         better, worse, dont_know = better_worse_off(frac_mean, frac_std, CO2_mean, CO2_std, CTRL_mean, CTRL_std, nyears, ttest_level)
 
         """
+        Abs Frac Anom
+        """
+        
+        abs_anom = abs(frac_anom)
+        abs_std_anom = abs(frac_anom / CTRL_std)
+        
+        """
         Root-mean square
         """
 
@@ -56,6 +63,8 @@ def frac_figure_data(frac, var_list, all_data, all_masks, weight_name = 'land_no
         """
 
         inner_dict[var+'_global'] = np.sum(frac_anom * global_weight)
+        inner_dict[var+'_abs'] = abs_anom
+        inner_dict[var+'_abs_std'] = abs_std_anom
         inner_dict[var+'_RMS'] = RMS
         inner_dict[var+'_RMS_std'] = RMS_std
         inner_dict[var+'_mod'] = np.sum(better.flatten() * weight)

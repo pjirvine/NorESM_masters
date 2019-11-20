@@ -58,7 +58,7 @@ plt.plot(global_precip_pc, color = 'k', label = 'P')
 
 
 plt.xlim(0,1)
-plt.ylim(-3,12)
+plt.ylim(-5,12)
 
 plt.axhline(0.,color='gray',zorder=0)
 plt.axvline(1.,color='gray',zorder=0)
