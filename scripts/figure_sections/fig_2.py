@@ -82,8 +82,12 @@ out_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/figures/'
 
 out_name = 'fig_2_Full-GLENS'
 y_label = 'Full-GLENS anomaly (mmd$^{-1}$)'
-
 cases = ['Full-GLENS','RCP8.5','Baseline']
+
+# out_name = 'fig_2_Half-GLENS'
+# y_label = 'Half-GLENS anomaly (mmd$^{-1}$)'
+# cases = ['Half-GLENS','RCP8.5','Baseline']
+
 var_1 = 'P-E'
 var_2 = 'PRECTMX'
 
