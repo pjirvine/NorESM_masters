@@ -1,6 +1,0 @@
-README
-order:
-feedback_monthly
-pe_script
-monthly_to_annual
-ann_mean_std

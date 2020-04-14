@@ -14,7 +14,7 @@ Function to get lons, lats and weights from example netcdf file.
 def get_lons_lats_weights():
 
     #Get example netcdf
-    glens_dir = '/n/home03/pjirvine/keithfs1_pji/GLENS/combined_annual_data/'
+    glens_dir = '../glens_data/'
     glens_filename = 'control.001.cam.h0.TREFHT.ann.201001-209912.nc'
     glens_fileloc = glens_dir + glens_filename
     test_nc = Dataset(glens_fileloc)
@@ -49,7 +49,7 @@ def get_glens_masks_weights():
     'land_noice_area' - land area without Greenland and Antarctica weighting using raw land area fraction (not mask)
     """
     
-    glen_dir = '/n/home03/pjirvine/keithfs1_pji/GLENS/fix/'
+    glen_dir = '../glens_fix/'
     
     """
     Masks
@@ -128,7 +128,7 @@ def get_glens_annual(var, exp, run, file_years):
     """    
   
     # Directory and filenames for annual timeseries of 2D data
-    glens_dir = '/n/home03/pjirvine/keithfs1_pji/GLENS/combined_annual_data/'
+    glens_dir = '../glens_data/'
     glens_filename = '{exp}.{run}.cam.h0.{var}.ann.{years}.nc'.format(exp=exp,run=run,var=var,years=file_years)
     
     # get data

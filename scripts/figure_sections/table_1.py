@@ -1,3 +1,4 @@
+# %load figure_sections/table_1.py
 """
 Get better / worse off statistics for:
 - land no ice area
@@ -6,7 +7,7 @@ Get better / worse off statistics for:
 """
 
 # output to here
-table_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/tables/'
+table_dir = '../tables/'
 
 weight = all_masks['land_noice_area']
 

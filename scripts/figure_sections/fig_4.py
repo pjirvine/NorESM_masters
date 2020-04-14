@@ -1,13 +1,16 @@
+# %load figure_sections/fig_4.py
 """
 Figure to plot RMS, etc. as a function of solar constant reduction
 """
 
-out_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/figures/'
+out_dir = '../figures/'
 
 # load up GeoMIP regional data
-table_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/tables/'
-frac_pd = pd.DataFrame.from_csv(table_dir + 'results_by_frac_GLENS.csv')
+table_dir = '../tables/'
+frac_pd = pd.read_csv(table_dir + 'results_by_frac_GLENS.csv')
 frac_dict = frac_pd.to_dict()
+# frac_pd = pd.DataFrame.from_csv(table_dir + 'results_by_frac_GLENS.csv')
+# frac_dict = frac_pd.to_dict()
 
 vars_all = ['TREFHT','TREFHTMX','P-E','PRECTMX','PRECT']
 vars_no_p = ['TREFHT','TREFHTMX','P-E','PRECTMX']
@@ -16,6 +19,7 @@ metrics = ['global','RMS','RMS_std','mod','exa']
 
 # x-axis
 x = frac_dict['P-E_RMS'].keys()
+x_axis = np.array(list(x))*0.01
 
 """
 Begin Plots
@@ -48,13 +52,13 @@ control_precip = all_data['PRECT','Baseline'][0].flatten()
 global_weight = all_masks['land_noice_area'].flatten()
 control_global_precip = np.sum(control_precip * global_weight)
 
-global_temp = frac_pd['TREFHT_global']
-global_precip_pc = 100.0 * (frac_pd['PRECT_global'] / control_global_precip)
+global_temp = frac_pd['TREFHT_global'].to_numpy()
+global_precip_pc = 100.0 * (frac_pd['PRECT_global'].to_numpy() / control_global_precip)
 
-print('global precip restored at:', global_precip_pc.abs().idxmin())
+print('global precip restored at:', np.abs(global_precip_pc).argmin(), "%")
 
-plt.plot(global_temp, color = var_cols['TREFHT'], label= var_labels['TREFHT'])
-plt.plot(global_precip_pc, color = 'k', label = 'P')
+plt.plot(x_axis, global_temp, color = var_cols['TREFHT'], label= var_labels['TREFHT'])
+plt.plot(x_axis, global_precip_pc, color = 'k', label = 'P')
 
 
 plt.xlim(0,1)
@@ -79,9 +83,11 @@ ax2 = fig.add_subplot(412)
 for var in vars_no_p:
     
     RMS = frac_pd[var+'_RMS'] / frac_pd[var+'_RMS'][0]
-    plt.plot(RMS, color = var_cols[var], label= var_labels[var])
-    print(var,' RMS at 0.5:', RMS[0.5], ' RMS at 1.0: ', RMS[1.0])
-    print(var,' RMS minimum:', RMS.min(), ' minimized at:', RMS.idxmin())
+    RMS = RMS.to_numpy()
+    plt.plot(x_axis, RMS, color = var_cols[var], label= var_labels[var])
+    print(var,' RMS at 0.5:', RMS[50], ' RMS at 1.0: ', RMS[100])
+#     print(var,' RMS at 0.5:', RMS[0.5], ' RMS at 1.0: ', RMS[1.0])
+    print(var,' RMS minimum:', RMS.min(), ' minimized at:', RMS.argmin(), "%")
 
 plt.ylim(0,1)
 plt.xlim(0,1)
@@ -103,8 +109,8 @@ ax3 = fig.add_subplot(413)
 
 for var in vars_no_p:
     
-    mod = 100. * frac_pd[var+'_mod']
-    plt.plot(mod, color = var_cols[var], label= var_labels[var])
+    mod = 100. * frac_pd[var+'_mod'].to_numpy()
+    plt.plot(x_axis, mod, color = var_cols[var], label= var_labels[var])
 
 plt.axvline(1.,color='gray',zorder=0)
     
@@ -126,8 +132,8 @@ ax4 = fig.add_subplot(414)
 
 for var in vars_no_p:
     
-    exa = 100. * frac_pd[var+'_exa']
-    plt.plot(exa, color = var_cols[var], label= var_labels[var])
+    exa = 100. * frac_pd[var+'_exa'].to_numpy()
+    plt.plot(x_axis, exa, color = var_cols[var], label= var_labels[var])
 
 # plt.text(0.88,7,'half-SG',rotation=90)
 plt.axvline(1.,color='gray',zorder=0)

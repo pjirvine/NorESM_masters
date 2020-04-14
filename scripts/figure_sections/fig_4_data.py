@@ -1,3 +1,4 @@
+# %load figure_sections/fig_4_data.py
 """
 Code to generate input data for fraction summary figure
 """
@@ -102,7 +103,7 @@ def dict_flipper(dict_to_flip):
 generate table of data for figure
 """
 
-out_dir = "/n/home03/pjirvine/projects/GLENS_fraction_better_off/tables/"
+out_dir = "../tables/"
 
 # Create an array of output from 0 to 1.5x GLENS
 frac_array = np.arange(0.,1.51,0.01)
