@@ -9,4 +9,4 @@ Contents:
 - archive = contains scripts specific to producing the input data on Harvard's Odyssey system. All processed data is available and these scripts do not need to be run.
 - irvine_erl_20.yml = python environment specification for project.
 
-conda env create -f environment.yml
+conda env create -f irvine_erl_20.yml
