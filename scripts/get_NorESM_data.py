@@ -7,6 +7,7 @@ This package
 from netCDF4 import Dataset
 import numpy as np
 from analysis import *
+from config import *
 
 """
 Function to get lons, lats and weights from example netcdf file.
@@ -194,8 +195,15 @@ def ensemble_process(var, case):
 Generate means and stds for all variables and cases
 """
 
-def get_all_cases_vars():
+def get_all_cases_vars_noresm():
     
+    # The list of years corresponding to the array indices.
+    year_idxs = np.array([IDX + 2020 for IDX in range(81)])
+    
+    #Specify time indexes for runs  
+    t_index_baseline = np.where((year_idxs > 2019) & (year_idxs < 2040))[0] # this captures 2020 ... 2039
+    t_index_exps = np.where((year_idxs > 2079) & (year_idxs < 2100))[0] # this captures 2080 ... 2099
+
     # Cases specify a combination of experiment and time-period
     cases = {'baseline':{'exp':'rcp45','t_index':t_index_baseline},
              'rcp45':{'exp':'rcp45','t_index':t_index_exps},
@@ -209,8 +217,8 @@ def get_all_cases_vars():
 
     all_data = {}
     for var in vars:
-        for case in cases:
-            all_data[var,case] = ensemble_process(var,case)
+        for case_key, case_value in cases.items():
+            all_data[var,case_key] = ensemble_process(var,case_value)
     #endfor
     
     return all_data
