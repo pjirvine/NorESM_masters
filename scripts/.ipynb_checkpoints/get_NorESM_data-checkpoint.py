@@ -183,6 +183,7 @@ def ensemble_process(var, case):
     # extract exp and t_index from case
     exp = case['exp']
     t_index = case['t_index']
+    runs = ['r1i1p1','r2i1p1','r3i1p1']
     
     # Create a list of data from each run in this exp, var combo
     full_data = [get_NorESM_annual(var, exp, run) for run in runs]
