@@ -1,6 +1,7 @@
+# %load figure_sections/fig_2.py
 
 """
-GFDL 2D histogram
+2D histogram
 """
 
 from matplotlib.colors import LogNorm
@@ -78,7 +79,7 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
 Cases to plot
 """
 
-out_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/figures/'
+out_dir = '../figures/'
 
 out_name = 'fig_2_Full-GLENS'
 y_label = 'Full-GLENS anomaly (mmd$^{-1}$)'

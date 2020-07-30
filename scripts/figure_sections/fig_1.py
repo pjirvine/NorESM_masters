@@ -1,3 +1,4 @@
+# %load figure_sections/fig_1.py
 
 #customize ticks
 import matplotlib.ticker as ticker
@@ -6,7 +7,7 @@ import matplotlib.ticker as ticker
 Figure settings
 """
 
-out_dir = '/n/home03/pjirvine/projects/GLENS_fraction_better_off/figures/'
+out_dir = '../figures/'
 
 weight = 'land_noice_area'
 out_filename = 'fig1'
